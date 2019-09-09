@@ -40,6 +40,14 @@ global_config = read_config('config.yaml')
 def makedatestamp(format='%F'):
   return datetime.now().strftime(format)
 
+def task_git_pull():
+  """
+  Ensure code is up to date before running
+  """
+  return {
+    'actions': ['git pull']
+  }
+
 def task_dump_all():
   """
   Loop over all tasks in the global config and create a separate
