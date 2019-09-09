@@ -29,6 +29,7 @@ $ doit dump_all:w40_*
 .  dump_all:w40_SU
 .  dump_all:w40_short
 .  dump_all:w40_gdata1a
+
 $ doit dump_all:*_gdata3
 .  dump_all:w42_gdata3
 .  dump_all:w48_gdata3
@@ -36,3 +37,6 @@ $ doit dump_all:*_gdata3
 .  dump_all:hh5_gdata3
 .  dump_all:w28_gdata3
 ```
+
+The script will pull the latest version of the code before running, so changing
+the project codes in `config.yaml` will change the statistics being dumped.
