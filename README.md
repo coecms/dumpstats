@@ -1,6 +1,6 @@
 # Dumpstats
 
-This script uses [doit](https://pydoit.org])to call system accounting scripts
+This script uses [doit](https://pydoit.org]) to call system accounting scripts
 which dump system usage data to text dumpfiles, which are later processed and
 the data added to the postgresql DB backend for grafana
 
