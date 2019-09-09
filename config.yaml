@@ -1,0 +1,65 @@
+defaults:
+  outputdir: dumpdir
+  dateformat: '%F'
+mounts:
+  short:
+    - v45
+    - w35
+    - w40
+    - w42
+    - w48
+    - w97
+    - hh5 
+    - ua8 
+    - e14
+    - g40
+    - x77 
+    - w28 
+    - x52 
+    - p66 
+    - ds2 
+    - e53 
+    - dt6 
+    - y99 
+    - nm03
+
+  gdata1a:
+    - v45
+    - w35 
+    - w40
+    - x77 
+    - e14 
+    - ua8 
+    - rq5 
+    - rq7 
+    - p66 
+
+  gdata3:
+    - w42 
+    - w48 
+    - w97 
+    - hh5
+    - w28 
+
+compute:
+  - v45
+  - w35
+  - w40
+  - w42
+  - w48
+  - w97
+  - hh5 
+  - rq5 
+  - rq7 
+  - ua8 
+  - e14
+  - g40
+  - x77 
+  - w28 
+  - x52 
+  - p66 
+  - ds2 
+  - e53 
+  - dt6 
+  - y99 
+  - nm03
