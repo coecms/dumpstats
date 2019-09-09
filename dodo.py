@@ -41,6 +41,11 @@ def makedatestamp(format='%F'):
   return datetime.now().strftime(format)
 
 def task_dump_all():
+  """
+  Loop over all tasks in the global config and create a separate
+  task for each by yielding a run dictionary. doit will generate
+  all the tasks first, and then run them all.
+  """
 
   stamp = makedatestamp(global_config['defaults']['dateformat'])
 
