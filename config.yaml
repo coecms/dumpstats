@@ -1,5 +1,5 @@
 defaults:
-  outputdir: dumpdir
+  outputdir: /g/data3/hh5/admin/analytics/logs
   dateformat: '%F'
 mounts:
   short:
