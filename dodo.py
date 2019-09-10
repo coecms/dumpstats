@@ -35,32 +35,22 @@ env = os.environ
 
 DOIT_CONFIG = {'action_string_formatting': 'both'}
 
+# Read the config inside the task so that it is the version after 
+# the git pull task
+global_config = read_config('config.yaml')
+
 def makedatestamp(format='%F'):
   return datetime.now().strftime(format)
 
-def task_git_pull():
+stamp = makedatestamp(global_config['defaults']['dateformat'])
+mkdir(global_config['defaults']['outputdir'])
+
+def task_dump_SU():
   """
-  Ensure code is up to date before running
+  Loop over all compute projects in the global config and create a 
+  separate task for each by yielding a run dictionary. doit will 
+  generate all the tasks first, and then run them all.
   """
-  return {
-    'actions': ['git pull']
-  }
-
-def task_dump_all():
-  """
-  Loop over all tasks in the global config and create a separate
-  task for each by yielding a run dictionary. doit will generate
-  all the tasks first, and then run them all.
-  """
-
-  # Read the config inside the task so that it is the version after 
-  # the git pull task
-  global_config = read_config('config.yaml')
-
-  stamp = makedatestamp(global_config['defaults']['dateformat'])
-
-  mkdir(global_config['defaults']['outputdir'])
-
   for project in global_config['compute']:
     outfile = '{stamp}.{project}.SU.dump'.format(stamp=stamp, project=project)
     config = {
@@ -71,6 +61,12 @@ def task_dump_all():
     }
     yield run_stats_cmd_gen(config)
 
+def task_dump_storage():
+  """
+  Loop over all mount points in the global config and create a 
+  separate task for each by yielding a run dictionary. doit will 
+  generate all the tasks first, and then run them all.
+  """
   for mount, projects in global_config['mounts'].items():
     for project in projects:
       outfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
