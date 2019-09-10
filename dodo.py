@@ -6,7 +6,7 @@ def run_stats_cmd_gen(config):
     """
     Generate an action dict to run a generic stats command
     """
-    action = "{cmd} {options} {project} > {outfile}".format(**config)
+    action = "{cmd} {options} > {outfile}".format(**config)
 
     return {
         'doc': 'Run {cmd} and dump to file'.format(**config),
@@ -35,8 +35,6 @@ env = os.environ
 
 DOIT_CONFIG = {'action_string_formatting': 'both'}
 
-global_config = read_config('config.yaml')
-
 def makedatestamp(format='%F'):
   return datetime.now().strftime(format)
 
@@ -55,6 +53,10 @@ def task_dump_all():
   all the tasks first, and then run them all.
   """
 
+  # Read the config inside the task so that it is the version after 
+  # the git pull task
+  global_config = read_config('config.yaml')
+
   stamp = makedatestamp(global_config['defaults']['dateformat'])
 
   mkdir(global_config['defaults']['outputdir'])
@@ -62,11 +64,10 @@ def task_dump_all():
   for project in global_config['compute']:
     outfile = '{stamp}.{project}.SU.dump'.format(stamp=stamp, project=project)
     config = {
-      'project': project,
       'cmd': 'nci_account',
       'name': '{project}_SU'.format(project=project),
       'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
-      'options': '-vv -P',
+      'options': '-vv -P {project}'.format(project=project),
     }
     yield run_stats_cmd_gen(config)
 
@@ -74,10 +75,9 @@ def task_dump_all():
     for project in projects:
       outfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
       config = {
-        'project': project,
         'cmd': '{mount}_files_report'.format(mount=mount),
         'name': '{project}_{mount}'.format(project=project, mount=mount),
         'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
-        'options': '-G',
+        'options': '-G {project}'.format(project=project),
       }
       yield run_stats_cmd_gen(config)
