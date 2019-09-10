@@ -33,6 +33,7 @@ mounts:
     - rq5 
     - rq7 
     - p66 
+    - g40
 
   gdata3:
     - w42 
