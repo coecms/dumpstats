@@ -1,20 +1,30 @@
-from datetime import datetime
+import time
+
+import glob
 import os
 import shlex
 import subprocess
 import yaml
 
+def write_header(filename):
+    with open(filename, 'w') as fh:
+      print("%%%%%%%%%%%%%%%%", file=fh)
+      print("{date}".format(date=makedatestamp('%a %b %d %H:%M:%S %Z %Y')), file=fh)
 
 def run_stats_cmd_gen(config):
     """
     Generate an action dict to run a generic stats command
     """
-    action = "{cmd} {options} > {outfile}".format(**config)
+    actions = []
+    if config.get('write_header', False):
+      actions.append( ( write_header, [config['outfile']] ))
+
+    actions.append( "{cmd} {options} >> {outfile}".format(**config) )
 
     return {
         'doc': 'Run {cmd} and dump to file'.format(**config),
         'name': config['name'],
-        'actions': [action],
+        'actions': actions,
         'verbosity': 2,
     }
 
@@ -43,7 +53,7 @@ DOIT_CONFIG = {'action_string_formatting': 'both'}
 global_config = read_config('config.yaml')
 
 def makedatestamp(format='%F'):
-  return datetime.now().strftime(format)
+  return time.strftime(format)
 
 stamp = makedatestamp(global_config['defaults']['dateformat'])
 mkdir(global_config['defaults']['outputdir'])
@@ -58,6 +68,7 @@ def task_dump_SU():
     outfile = '{stamp}.{project}.SU.dump'.format(stamp=stamp, project=project)
     config = {
       'cmd': 'nci_account',
+      'write_header': True,
       'name': '{project}_SU'.format(project=project),
       'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
       'options': '-vv -P {project}'.format(project=project),
@@ -75,6 +86,7 @@ def task_dump_storage():
       outfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
       config = {
         'cmd': '{mount}_files_report'.format(mount=mount),
+        'write_header': True,
         'name': '{project}_{mount}'.format(project=project, mount=mount),
         'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
         'options': '-G {project}'.format(project=project),
@@ -88,15 +100,15 @@ def task_listing():
     'verbosity': 2,
   }
 
-# Global variable so we can 
+# Global variable so we can update and access in multiple tasks
 server = None
+
+remote_host = 'jenkins'
+remote_port = 5432
+local_port = 9107
 
 def start_server():
   global server
-
-  remote_host = 'jenkins'
-  remote_port = 5432
-  local_port = 9107
 
   server = subprocess.Popen(
     shlex.split('ssh -NL {local_port}:localhost:{remote_port} {remote_host}'.format(
@@ -123,8 +135,48 @@ def task_start_tunnel():
   }
   return True
 
-# def task_stop_tunnel():
-#   return {
-#     'actions': [ stop_server ]
-#   }
-#   return True
+def task_upload_usage():
+  """
+  Loop over all compute projects in the global config and create a 
+  separate task for each by yielding a run dictionary. doit will 
+  generate all the tasks first, and then run them all.
+  """
+
+  dumpfiles = glob.glob(os.path.join(global_config['defaults']['outputdir'],'*.SU.dump'))
+
+  for file in dumpfiles:
+    # Grab the project code from the file
+    datestamp, project = os.path.basename(file).split('.')[:2]
+    outfile = '{project}.SU.upload.log'.format(project=project)
+    config = {
+      'cmd': 'parse_account_usage_data',
+      'name': '{project}_SU_upload_{datestamp}'.format(project=project, datestamp=datestamp),
+      'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
+      'options': '-db postgresql://localhost:{port}/grafana {file}'.format(port=local_port,file=file),
+      'task_dep': ['start_tunnel'],
+    }
+    yield run_stats_cmd_gen(config)
+
+def task_upload_storage():
+  """
+  Loop over all compute projects in the global config and create a 
+  separate task for each by yielding a run dictionary. doit will 
+  generate all the tasks first, and then run them all.
+  """
+
+  dumpfiles = []
+  for mount in global_config['mounts']:
+    dumpfiles.extend(glob.glob(os.path.join(global_config['defaults']['outputdir'],'*.{mount}.dump'.format(mount=mount))))
+
+  for file in dumpfiles:
+    # Grab the project code from the file
+    datestamp, project, mount = os.path.basename(file).split('.')[:3]
+    outfile = '{project}.SU.upload.log'.format(project=project)
+    config = {
+      'cmd': 'parse_account_usage_data',
+      'name': '{project}_{mount}_upload_{datestamp}'.format(project=project, mount=mount, datestamp=datestamp),
+      'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
+      'options': '-db postgresql://localhost:{port}/grafana {file}'.format(port=local_port,file=file),
+      'task_dep': ['start_tunnel'],
+    }
+    yield run_stats_cmd_gen(config)
