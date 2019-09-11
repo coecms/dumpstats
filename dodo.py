@@ -35,8 +35,6 @@ env = os.environ
 
 DOIT_CONFIG = {'action_string_formatting': 'both'}
 
-# Read the config inside the task so that it is the version after 
-# the git pull task
 global_config = read_config('config.yaml')
 
 def makedatestamp(format='%F'):
