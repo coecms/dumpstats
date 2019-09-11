@@ -1,6 +1,9 @@
 from datetime import datetime
 import os
+import shlex
+import subprocess
 import yaml
+
 
 def run_stats_cmd_gen(config):
     """
@@ -77,3 +80,51 @@ def task_dump_storage():
         'options': '-G {project}'.format(project=project),
       }
       yield run_stats_cmd_gen(config)
+
+
+def task_listing():
+  return {
+    'actions': ['ls'],
+    'verbosity': 2,
+  }
+
+# Global variable so we can 
+server = None
+
+def start_server():
+  global server
+
+  remote_host = 'jenkins'
+  remote_port = 5432
+  local_port = 9107
+
+  server = subprocess.Popen(
+    shlex.split('ssh -NL {local_port}:localhost:{remote_port} {remote_host}'.format(
+      local_port=local_port,
+      remote_port=remote_port,
+      remote_host=remote_host,
+      )
+    )
+  )
+  
+def stop_server():
+  global server
+  return server.kill()
+  
+def task_start_tunnel():
+  """
+  Open a tunnel to access the postgres DB on the jenkins VM
+  The teardown action ensures the tunnel is closed when all
+  tasks are finished
+  """
+  return {
+    'actions': [ start_server ],
+    'teardown': [ stop_server ]
+  }
+  return True
+
+# def task_stop_tunnel():
+#   return {
+#     'actions': [ stop_server ]
+#   }
+#   return True
