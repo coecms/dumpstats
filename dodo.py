@@ -92,8 +92,12 @@ def task_dump_storage():
       yield run_stats_cmd_gen(config)
 
 
-def task_listing():
+def task__listing():
+  """
+  Hidden test task that just runs ls
+  """
   return {
+    'doc': 'test action: directory listing',
     'actions': ['ls'],
     'verbosity': 2,
   }
