@@ -29,6 +29,8 @@ def run_stats_cmd_gen(config):
     }
     if config.get('task_dep',False):
       job_dict['task_dep'] = config['task_dep']
+    if config.get('file_dep',False):
+      job_dict['file_dep'] = config['file_dep']
 
     return job_dict
 
@@ -159,6 +161,7 @@ def task_upload_usage():
       'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
       'options': '-db postgresql://localhost:{port}/grafana {file}'.format(port=local_port,file=dumpfile),
       'task_dep': [ 'dump_SU:{project}_SU'.format(project=project), 'start_tunnel' ],
+      'file_dep': [ dumpfile ],
     }
     yield run_stats_cmd_gen(config)
 
@@ -173,12 +176,13 @@ def task_upload_storage():
     for project in projects:
       dumpfile = '{stamp}.{project}.SU.dump'.format(stamp=stamp, project=project)
       dumpfile = os.path.join(global_config['defaults']['outputdir'],dumpfile)
-      outfile = '{project}.SU.upload.log'.format(project=project)
+      outfile = '{project}.storage.upload.log'.format(project=project)
       config = {
         'cmd': 'parse_account_usage_data',
         'name': '{project}_{mount}_upload_{datestamp}'.format(project=project, mount=mount, datestamp=stamp),
         'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
         'options': '-db postgresql://localhost:{port}/grafana {file}'.format(port=local_port,file=dumpfile),
         'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
+        'file_dep': [ dumpfile ],
       }
       yield run_stats_cmd_gen(config)
