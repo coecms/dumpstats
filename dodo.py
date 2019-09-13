@@ -174,7 +174,7 @@ def task_upload_storage():
 
   for mount, projects in global_config['mounts'].items():
     for project in projects:
-      dumpfile = '{stamp}.{project}.SU.dump'.format(stamp=stamp, project=project)
+      dumpfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
       dumpfile = os.path.join(global_config['defaults']['outputdir'],dumpfile)
       outfile = '{project}.storage.upload.log'.format(project=project)
       config = {
