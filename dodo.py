@@ -155,7 +155,7 @@ def task_upload_usage():
       'name': '{project}_SU_upload_{datestamp}'.format(project=project, datestamp=datestamp),
       'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
       'options': '-db postgresql://localhost:{port}/grafana {file}'.format(port=local_port,file=file),
-      'task_dep': ['start_tunnel'],
+      'task_dep': [ 'dump_SU', 'start_tunnel'],
     }
     yield run_stats_cmd_gen(config)
 
@@ -179,6 +179,6 @@ def task_upload_storage():
       'name': '{project}_{mount}_upload_{datestamp}'.format(project=project, mount=mount, datestamp=datestamp),
       'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
       'options': '-db postgresql://localhost:{port}/grafana {file}'.format(port=local_port,file=file),
-      'task_dep': ['start_tunnel'],
+      'task_dep': [ 'dump_storage', 'start_tunnel'],
     }
     yield run_stats_cmd_gen(config)
