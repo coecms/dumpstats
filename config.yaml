@@ -41,7 +41,6 @@ mounts:
     - w97 
     - hh5
     - w28 
-    - w58
 
 compute:
   - v45
