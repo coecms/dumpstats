@@ -1,12 +1,12 @@
 defaults:
-  # outputdir: /g/data3/hh5/admin/analytics/logs
+  outputdir: /g/data3/hh5/admin/analytics/logs
   outputdir: dump
   dateformat: '%F'
   remote_host: jenkins
   remote_port: 5432
   local_port: 9107
-  dburl: sqlite:///dump_{local_port}.db
-  # dburl: postgresql://localhost:{local_port}/grafana
+  # dburl: sqlite:///dump_{local_port}.db
+  dburl: postgresql://localhost:{local_port}/grafana
 mounts:
   short:
     - v45
@@ -55,9 +55,6 @@ compute:
   - w42
   - w48
   - w97
-  - hh5 
-  - rq5 
-  - rq7 
   - ua8 
   - e14
   - g40
