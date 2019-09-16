@@ -111,20 +111,12 @@ def task__listing():
 # Global variable so we can update and access in multiple tasks
 server = None
 
-remote_host = 'jenkins'
-remote_port = 5432
-local_port = 9107
-
 def start_server():
   global server
 
   server = subprocess.Popen(
     shlex.split('ssh -NL {local_port}:localhost:{remote_port} {remote_host}'.format(
-      local_port=local_port,
-      remote_port=remote_port,
-      remote_host=remote_host,
-      )
-    )
+                **global_config['defaults']))
   )
   
 def stop_server():
@@ -155,13 +147,15 @@ def task_upload_usage():
     dumpfile = os.path.join(global_config['defaults']['outputdir'],dumpfile)
     # Grab the project code from the file
     outfile = '{project}.SU.upload.log'.format(project=project)
+    dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
     config = {
       'cmd': 'parse_account_usage_data',
       'name': '{project}_SU_upload_{datestamp}'.format(project=project, datestamp=stamp),
       'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
-      'options': '-db postgresql://localhost:{port}/grafana {file}'.format(port=local_port,file=dumpfile),
-      'task_dep': [ 'dump_SU:{project}_SU'.format(project=project), 'start_tunnel' ],
-      'file_dep': [ dumpfile ],
+      'options': '-v -n -db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
+      # 'task_dep': [ 'dump_SU:{project}_SU'.format(project=project), 'start_tunnel' ],
+      'task_dep': [ 'start_tunnel' ],
+      # 'file_dep': [ dumpfile ],
     }
     yield run_stats_cmd_gen(config)
 
@@ -177,12 +171,14 @@ def task_upload_storage():
       dumpfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
       dumpfile = os.path.join(global_config['defaults']['outputdir'],dumpfile)
       outfile = '{project}.storage.upload.log'.format(project=project)
+      dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
       config = {
-        'cmd': 'parse_account_usage_data',
+        'cmd': 'parse_user_storage_data',
         'name': '{project}_{mount}_upload_{datestamp}'.format(project=project, mount=mount, datestamp=stamp),
         'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
-        'options': '-db postgresql://localhost:{port}/grafana {file}'.format(port=local_port,file=dumpfile),
-        'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
-        'file_dep': [ dumpfile ],
+        'options': '-v -db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
+        # 'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
+        'task_dep': [ 'start_tunnel' ],
+        # 'file_dep': [ dumpfile ],
       }
       yield run_stats_cmd_gen(config)
