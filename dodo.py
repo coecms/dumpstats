@@ -60,7 +60,8 @@ def makedatestamp(format='%F'):
   return time.strftime(format)
 
 stamp = makedatestamp(global_config['defaults']['dateformat'])
-mkdir(global_config['defaults']['outputdir'])
+outputdir = global_config['defaults']['outputdir']
+mkdir(outputdir)
 
 def task_dump_SU():
   """
@@ -74,7 +75,7 @@ def task_dump_SU():
       'cmd': 'nci_account',
       'write_header': True,
       'name': '{project}_SU'.format(project=project),
-      'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
+      'outfile': os.path.join(outputdir,outfile),
       'options': '-vv -P {project}'.format(project=project),
     }
     yield run_stats_cmd_gen(config)
@@ -92,7 +93,7 @@ def task_dump_storage():
         'cmd': '{mount}_files_report'.format(mount=mount),
         'write_header': True,
         'name': '{project}_{mount}'.format(project=project, mount=mount),
-        'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
+        'outfile': os.path.join(outputdir,outfile),
         'options': '-G {project}'.format(project=project),
       }
       yield run_stats_cmd_gen(config)
@@ -142,16 +143,15 @@ def task_upload_usage():
   generate all the tasks first, and then run them all.
   """
 
-  for project in global_config['compute']:
-    dumpfile = '{stamp}.{project}.SU.dump'.format(stamp=stamp, project=project)
-    dumpfile = os.path.join(global_config['defaults']['outputdir'],dumpfile)
+  for dumpfile in glob.glob(os.path.join(outputdir,'*.SU.dump')):
+    stamp, project = os.path.basename(dumpfile).split('.')[:2]
     # Grab the project code from the file
     outfile = '{project}.SU.upload.log'.format(project=project)
     dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
     config = {
       'cmd': 'parse_account_usage_data',
       'name': '{project}_SU_upload_{datestamp}'.format(project=project, datestamp=stamp),
-      'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
+      'outfile': os.path.join(outputdir,outfile),
       'options': '-v -n -db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
       # 'task_dep': [ 'dump_SU:{project}_SU'.format(project=project), 'start_tunnel' ],
       'task_dep': [ 'start_tunnel' ],
@@ -161,21 +161,19 @@ def task_upload_usage():
 
 def task_upload_storage():
   """
-  Loop over all compute projects in the global config and create a 
-  separate task for each by yielding a run dictionary. doit will 
+  Loop over all mounts the global config, find all dumpfiles and create 
+  a separate sub-task for each by yielding a run dictionary. doit will 
   generate all the tasks first, and then run them all.
   """
-
-  for mount, projects in global_config['mounts'].items():
-    for project in projects:
-      dumpfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
-      dumpfile = os.path.join(global_config['defaults']['outputdir'],dumpfile)
+  for mount in global_config['mounts']:
+    for dumpfile in glob.glob(os.path.join(outputdir,'*.{mount}.dump'.format(mount=mount))):
+      stamp, project = os.path.basename(dumpfile).split('.')[:2]
       outfile = '{project}.storage.upload.log'.format(project=project)
       dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
       config = {
         'cmd': 'parse_user_storage_data',
         'name': '{project}_{mount}_upload_{datestamp}'.format(project=project, mount=mount, datestamp=stamp),
-        'outfile': os.path.join(global_config['defaults']['outputdir'],outfile),
+        'outfile': os.path.join(outputdir,outfile),
         'options': '-v -db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
         # 'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
         'task_dep': [ 'start_tunnel' ],
