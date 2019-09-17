@@ -152,7 +152,7 @@ def task_upload_usage():
       'cmd': 'parse_account_usage_data',
       'name': '{project}_SU_upload_{datestamp}'.format(project=project, datestamp=stamp),
       'outfile': os.path.join(outputdir,outfile),
-      'options': '-v -n -db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
+      'options': '-v -db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
       # 'task_dep': [ 'dump_SU:{project}_SU'.format(project=project), 'start_tunnel' ],
       'task_dep': [ 'start_tunnel' ],
       # 'file_dep': [ dumpfile ],
