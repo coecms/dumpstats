@@ -27,6 +27,7 @@ mounts:
     - dt6 
     - y99 
     - nm03
+    - k10
 
   gdata1a:
     - v45
@@ -46,6 +47,7 @@ mounts:
     - w97 
     - hh5
     - w28 
+    - k10
 
 compute:
   - v45
