@@ -2,6 +2,7 @@ import time
 
 import glob
 import os
+import psutil
 import shlex
 import subprocess
 import yaml
@@ -128,6 +129,10 @@ def start_server():
   
 def stop_server():
   global server
+
+  for child in psutil.Process(server.pid).children(recursive=True):
+    child.terminate()
+    child.wait()
   server.terminate()
   server.wait()
   
