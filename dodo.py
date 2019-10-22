@@ -128,7 +128,8 @@ def start_server():
   
 def stop_server():
   global server
-  return server.kill()
+  server.terminate()
+  server.wait()
   
 def task_start_tunnel():
   """
