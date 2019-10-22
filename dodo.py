@@ -116,9 +116,15 @@ def start_server():
   global server
 
   server = subprocess.Popen(
-    shlex.split('ssh -NL {local_port}:localhost:{remote_port} {remote_host}'.format(
+    shlex.split('ssh -f -N -L {local_port}:localhost:{remote_port} {remote_host}'.format(
                 **global_config['defaults']))
   )
+  # The -f option will put the tunnel into the background once it is 
+  # established, so poll until this is done in case connection takes
+  # a long time
+  stat = ssh_proc.poll()
+  while stat == None:
+    stat = ssh_proc.poll()
   
 def stop_server():
   global server
