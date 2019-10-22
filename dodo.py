@@ -122,9 +122,9 @@ def start_server():
   # The -f option will put the tunnel into the background once it is 
   # established, so poll until this is done in case connection takes
   # a long time
-  stat = ssh_proc.poll()
+  stat = server.poll()
   while stat == None:
-    stat = ssh_proc.poll()
+    stat = server.poll()
   
 def stop_server():
   global server
