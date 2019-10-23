@@ -4,6 +4,7 @@ import glob
 import os
 import psutil
 import shlex
+import socket
 import subprocess
 import yaml
 
@@ -113,27 +114,30 @@ def task__listing():
 # Global variable so we can update and access in multiple tasks
 server = None
 
+def poll_port(host, port):
+  """
+  Poll a port and only return when port is open
+  """
+  result = -1
+  while result != 0:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)
+    result = sock.connect_ex((host,port))
+    sock.close()
+
 def start_server():
   global server
-
   server = subprocess.Popen(
-    shlex.split('ssh -f -N -L {local_port}:localhost:{remote_port} {remote_host}'.format(
+    shlex.split('ssh -N -L '
+                '{local_port}:localhost:{remote_port} '
+                '{remote_host}'.format(
                 **global_config['defaults']))
   )
-  # The -f option will put the tunnel into the background once it is 
-  # established, so poll until this is done in case connection takes
-  # a long time
-  stat = server.poll()
-  while stat == None:
-    stat = server.poll()
+  poll_port('localhost', global_config['defaults']['local_port'])
   
 def stop_server():
   global server
-
-  for child in psutil.Process(server.pid).children(recursive=True):
-    child.terminate()
-    child.wait()
-  server.terminate()
+  server.kill()
   server.wait()
   
 def task_start_tunnel():
