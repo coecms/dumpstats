@@ -48,6 +48,11 @@ mounts:
     - w28 
     - k10
 
+  gdata4:
+    - ik11 
+    - x77 
+    - nm03 
+
 compute:
   - v45
   - w35
