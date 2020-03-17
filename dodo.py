@@ -74,13 +74,27 @@ def task_dump_SU():
   for project in global_config['compute']:
     outfile = '{stamp}.{project}.SU.dump'.format(stamp=stamp, project=project)
     config = {
-      'cmd': 'nci_account',
+      'cmd': 'nci_account_json',
       'write_header': True,
       'name': '{project}_SU'.format(project=project),
       'outfile': os.path.join(outputdir,outfile),
-      'options': '-vv -P {project}'.format(project=project),
+      'options': '-P {project}'.format(project=project),
     }
     yield run_stats_cmd_gen(config)
+
+def task_dump_lquota():
+  """
+  Dump lquota data until reporting tools are fixed
+  """
+  outfile = '{stamp}.lquota.dump'.format(stamp=stamp)
+  config = {
+    'cmd': 'lquota',
+    'write_header': True,
+    'name': 'lquota',
+    'outfile': os.path.join(outputdir,outfile),
+    'options': ''
+  }
+  yield run_stats_cmd_gen(config)
 
 def task_dump_storage():
   """
@@ -170,7 +184,7 @@ def task_upload_usage():
       'outfile': os.path.join(outputdir,outfile),
       'options': '-db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
       # 'task_dep': [ 'dump_SU:{project}_SU'.format(project=project), 'start_tunnel' ],
-      'task_dep': [ 'start_tunnel' ],
+      # 'task_dep': [ 'start_tunnel' ],
       # 'file_dep': [ dumpfile ],
     }
     yield run_stats_cmd_gen(config)
@@ -192,7 +206,28 @@ def task_upload_storage():
         'outfile': os.path.join(outputdir,outfile),
         'options': '-db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
         # 'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
-        'task_dep': [ 'start_tunnel' ],
+        # 'task_dep': [ 'start_tunnel' ],
         # 'file_dep': [ dumpfile ],
       }
       yield run_stats_cmd_gen(config)
+
+def task_upload_lquota():
+  """
+  Loop over all mounts the global config, find all dumpfiles and create 
+  a separate sub-task for each by yielding a run dictionary. doit will 
+  generate all the tasks first, and then run them all.
+  """
+  for dumpfile in glob.glob(os.path.join(outputdir,'*.lquota.dump')):
+    stamp = os.path.basename(dumpfile).split('.')[0]
+    outfile = 'lquota.storage.upload.log'
+    dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
+    config = {
+      'cmd': 'parse_lquota_data',
+      'name': 'lquota_upload_{datestamp}'.format(datestamp=stamp),
+      'outfile': os.path.join(outputdir,outfile),
+      'options': '-db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
+      # 'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
+      # 'task_dep': [ 'start_tunnel' ],
+      # 'file_dep': [ dumpfile ],
+    }
+    yield run_stats_cmd_gen(config)
