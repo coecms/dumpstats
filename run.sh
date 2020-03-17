@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Ensure correct modules loaded
-module purge
-module use /g/data3/hh5/public/modules
-module load conda
+# module purge
+# module use /g/data3/hh5/public/modules
+# module load conda
 conda activate stats
 
 # Get latest version of config.yaml
