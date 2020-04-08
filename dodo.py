@@ -105,12 +105,13 @@ def task_dump_storage():
   for mount, projects in global_config['mounts'].items():
     for project in projects:
       outfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
+      print(mount, project, outfile)
       config = {
-        'cmd': '{mount}_files_report'.format(mount=mount),
+        'cmd': 'nci-files-report'.format(mount=mount),
         'write_header': True,
         'name': '{project}_{mount}'.format(project=project, mount=mount),
         'outfile': os.path.join(outputdir,outfile),
-        'options': '-G {project}'.format(project=project),
+        'options': '--group {project} --filesystem {mount}'.format(project=project, mount=mount),
       }
       yield run_stats_cmd_gen(config)
 
