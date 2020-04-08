@@ -5,8 +5,8 @@ defaults:
   remote_host: jenkins
   remote_port: 5432
   local_port: 9107
-  dburl: sqlite:///dump_{local_port}.db
-  # dburl: postgresql://localhost:{local_port}/grafana
+  # dburl: sqlite:///dump_{local_port}.db
+  dburl: postgresql://localhost:{local_port}/grafana
 mounts:
   scratch:
     - v45
