@@ -5,10 +5,10 @@ defaults:
   remote_host: jenkins
   remote_port: 5432
   local_port: 9107
-  # dburl: sqlite:///dump_{local_port}.db
-  dburl: postgresql://localhost:{local_port}/grafana
+  dburl: sqlite:///dump_{local_port}.db
+  # dburl: postgresql://localhost:{local_port}/grafana
 mounts:
-  short:
+  scratch:
     - v45
     - w35
     - w40
@@ -29,8 +29,7 @@ mounts:
     - y99 
     - nm03
     - k10
-
-  gdata1a:
+  gdata:
     - v45
     - w35 
     - w40
@@ -40,20 +39,14 @@ mounts:
     - rq7 
     - p66 
     - g40
-
-  gdata3:
     - w42 
     - w48 
     - w97 
     - hh5
     - w28 
     - k10
-
-  gdata4:
     - ik11 
-    - x77 
     - nm03 
-
 compute:
   - v45
   - w35
