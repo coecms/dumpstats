@@ -1,5 +1,7 @@
 #!/bin/bash
 
+eval "$(conda shell.bash hook)"
+
 # Ensure correct modules loaded
 module purge
 module use /g/data3/hh5/public/modules
