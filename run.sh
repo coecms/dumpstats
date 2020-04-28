@@ -18,4 +18,4 @@ doit -n 64 -P thread dump_SU dump_lquota dump_storage
 
 # Split the upload into a separate call using a single thread
 # doit start_tunnel upload_storage upload_usage
-doit start_tunnel upload_usage upload_lquota
+doit start_tunnel upload_usage upload_lquota upload_storage
