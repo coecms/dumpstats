@@ -48,6 +48,7 @@ mounts:
     - ik11 
     - nm03 
     - cj50 
+    - y99
 compute:
   - v45
   - w35
