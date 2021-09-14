@@ -29,6 +29,7 @@ mounts:
     - y99 
     - nm03
     - k10
+    - p73
   gdata:
     - v45
     - w35 
@@ -49,6 +50,7 @@ mounts:
     - nm03 
     - cj50 
     - y99
+    - p73
 compute:
   - v45
   - w35
