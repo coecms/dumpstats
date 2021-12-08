@@ -30,7 +30,7 @@ mounts:
     - nm03
     - k10
     - p73
-    - dp09
+    - dp9
   gdata:
     - v45
     - w35 
@@ -52,7 +52,7 @@ mounts:
     - cj50 
     - y99
     - p73
-    - dp09
+    - dp9
 compute:
   - v45
   - w35
@@ -72,4 +72,4 @@ compute:
   - y99 
   - nm03
   - k10
-  - dp09
+  - dp9
