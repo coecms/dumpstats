@@ -10,10 +10,8 @@ defaults:
 mounts:
   scratch:
     - v45
-    - w35
     - w40
     - w42
-    - w48
     - w97
     - hh5 
     - ua8 
@@ -33,7 +31,6 @@ mounts:
     - dp9
   gdata:
     - v45
-    - w35 
     - w40
     - x77 
     - e14 
@@ -42,7 +39,6 @@ mounts:
     - p66 
     - g40
     - w42 
-    - w48 
     - w97 
     - hh5
     - w28 
@@ -55,10 +51,8 @@ mounts:
     - dp9
 compute:
   - v45
-  - w35
   - w40
   - w42
-  - w48
   - w97
   - e14
   - g40
