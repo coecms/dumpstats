@@ -29,6 +29,7 @@ mounts:
     - k10
     - p73
     - dp9
+    - jk72
   gdata:
     - v45
     - w40
@@ -49,6 +50,7 @@ mounts:
     - y99
     - p73
     - dp9
+    - jk72
 compute:
   - v45
   - w40
@@ -67,3 +69,4 @@ compute:
   - nm03
   - k10
   - dp9
+  - jk72
