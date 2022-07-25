@@ -103,6 +103,12 @@ def task_dump_storage():
   generate all the tasks first, and then run them all.
   """
   for mount, projects in global_config['mounts'].items():
+    if mount == 'scratch':
+      # scratch accounting is by contents of a /scratch/project directory, not group ownership of files
+      project_option = '--project'
+    else:
+      project_option = '--group'
+
     for project in projects:
       outfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
       print(mount, project, outfile)
@@ -111,7 +117,7 @@ def task_dump_storage():
         'write_header': True,
         'name': '{project}_{mount}'.format(project=project, mount=mount),
         'outfile': os.path.join(outputdir,outfile),
-        'options': '--group {project} --filesystem {mount}'.format(project=project, mount=mount),
+        'options': '{option} {project} --filesystem {mount}'.format(option=project_option, project=project, mount=mount),
       }
       yield run_stats_cmd_gen(config)
 
