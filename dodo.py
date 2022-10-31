@@ -2,11 +2,18 @@ import time
 
 import glob
 import os
-import psutil
 import shlex
 import socket
 import subprocess
 import yaml
+import datetime
+
+def get_nci_files_report_url():
+  ### Straight from the horse's mouth
+  with open('/opt/nci/nci-files-report/etc/nci-files-report/client.conf','r') as f:
+    d = yaml.safe_load(f)
+  return d['base url']
+
 
 def write_header(filename):
     with open(filename, 'w') as fh:
@@ -198,20 +205,20 @@ def task_upload_usage():
 
 def task_upload_storage():
   """
-  Loop over all mounts the global config, find all dumpfiles and create 
-  a separate sub-task for each by yielding a run dictionary. doit will 
-  generate all the tasks first, and then run them all.
+  Loop over all mounts the global config, use the backend API for
+  nci-files-report, gather and upload storage data for all projects
+  on each requested filesystem.
   """
+  stamp = datetime.datetime.now().replace(microsecond=0).isoformat()
+  nci_api_url = get_nci_files_report_url()
   for mount in global_config['mounts']:
-    for dumpfile in glob.glob(os.path.join(outputdir,'*.{mount}.dump'.format(mount=mount))):
-      stamp, project = os.path.basename(dumpfile).split('.')[:2]
-      outfile = '{project}.storage.upload.log'.format(project=project)
+      outfile = 'allprojects.storage.upload.log'
       dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
       config = {
         'cmd': 'parse_user_storage_data',
-        'name': '{project}_{mount}_upload_{datestamp}'.format(project=project, mount=mount, datestamp=stamp),
+        'name': f'{mount}_upload_{stamp}',
         'outfile': os.path.join(outputdir,outfile),
-        'options': '-db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
+        'options': f"-db {dburl} -P {','.join(global_config['mounts'][mount])} -f {mount} {nci_api_url}"
         # 'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
         # 'task_dep': [ 'start_tunnel' ],
         # 'file_dep': [ dumpfile ],
