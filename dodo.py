@@ -8,13 +8,6 @@ import subprocess
 import yaml
 import datetime
 
-def get_nci_files_report_url():
-  ### Straight from the horse's mouth
-  with open('/opt/nci/nci-files-report/etc/nci-files-report/client.conf','r') as f:
-    d = yaml.safe_load(f)
-  return d['base url']
-
-
 def write_header(filename):
     with open(filename, 'w') as fh:
       print("%%%%%%%%%%%%%%%%", file=fh)
@@ -116,17 +109,26 @@ def task_dump_storage():
     else:
       project_option = '--group'
 
-    for project in projects:
-      outfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
-      print(mount, project, outfile)
-      config = {
-        'cmd': 'nci-files-report'.format(mount=mount),
-        'write_header': True,
-        'name': '{project}_{mount}'.format(project=project, mount=mount),
-        'outfile': os.path.join(outputdir,outfile),
-        'options': '{option} {project} --filesystem {mount}'.format(option=project_option, project=project, mount=mount),
-      }
-      yield run_stats_cmd_gen(config)
+    #for project in projects:
+    #  outfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
+    #  print(mount, project, outfile)
+    #  config = {
+    #    'cmd': 'nci-files-report'.format(mount=mount),
+    #    'write_header': True,
+    #    'name': '{project}_{mount}'.format(project=project, mount=mount),
+    #    'outfile': os.path.join(outputdir,outfile),
+    #    'options': '{option} {project} --filesystem {mount}'.format(option=project_option, project=project, mount=mount),
+    #  }
+    outfile=f'{stamp}.allprojects.{mount}.json'
+    print(mount, outfile)
+    config = {
+      'cmd': 'nci-files-report',
+      'write_header': False,
+      'name': f'allprojects_{mount}',
+      'outfile': os.path.join(outputdir,outfile),
+      'options': f"{project_option} {' '.join(projects)} --filesystem {mount} --json"
+    }
+    yield run_stats_cmd_gen(config)
 
 
 def task__listing():
@@ -209,21 +211,21 @@ def task_upload_storage():
   nci-files-report, gather and upload storage data for all projects
   on each requested filesystem.
   """
-  stamp = datetime.datetime.now().replace(microsecond=0).isoformat()
-  nci_api_url = get_nci_files_report_url()
   for mount in global_config['mounts']:
-      outfile = 'allprojects.storage.upload.log'
+      jsonfiles = glob.glob(os.path.join(outputdir,f'*.allprojects.{mount}.json'))
+      stamp = os.path.basename
       dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
-      config = {
-        'cmd': 'parse_user_storage_data',
-        'name': f'{mount}_upload_{stamp}',
-        'outfile': os.path.join(outputdir,outfile),
-        'options': f"-db {dburl} -P {','.join(global_config['mounts'][mount])} -f {mount} {nci_api_url}"
-        # 'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
-        # 'task_dep': [ 'start_tunnel' ],
-        # 'file_dep': [ dumpfile ],
-      }
-      yield run_stats_cmd_gen(config)
+      for jsonfile in jsonfiles:
+        config = {
+          'cmd': 'parse_user_storage_data',
+          'name': f'{mount}_upload_{stamp}',
+          'outfile': os.path.join(outputdir,'allprojects.storage.upload.log'),
+          'options': f'-db {dburl} {jsonfile}'
+          # 'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
+          # 'task_dep': [ 'start_tunnel' ],
+          # 'file_dep': [ dumpfile ],
+        }
+        yield run_stats_cmd_gen(config)
 
 def task_upload_lquota():
   """
