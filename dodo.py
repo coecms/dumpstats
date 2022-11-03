@@ -2,11 +2,11 @@ import time
 
 import glob
 import os
-import psutil
 import shlex
 import socket
 import subprocess
 import yaml
+import datetime
 
 def write_header(filename):
     with open(filename, 'w') as fh:
@@ -109,17 +109,26 @@ def task_dump_storage():
     else:
       project_option = '--group'
 
-    for project in projects:
-      outfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
-      print(mount, project, outfile)
-      config = {
-        'cmd': 'nci-files-report'.format(mount=mount),
-        'write_header': True,
-        'name': '{project}_{mount}'.format(project=project, mount=mount),
-        'outfile': os.path.join(outputdir,outfile),
-        'options': '{option} {project} --filesystem {mount}'.format(option=project_option, project=project, mount=mount),
-      }
-      yield run_stats_cmd_gen(config)
+    #for project in projects:
+    #  outfile = '{stamp}.{project}.{mount}.dump'.format(stamp=stamp, project=project, mount=mount)
+    #  print(mount, project, outfile)
+    #  config = {
+    #    'cmd': 'nci-files-report'.format(mount=mount),
+    #    'write_header': True,
+    #    'name': '{project}_{mount}'.format(project=project, mount=mount),
+    #    'outfile': os.path.join(outputdir,outfile),
+    #    'options': '{option} {project} --filesystem {mount}'.format(option=project_option, project=project, mount=mount),
+    #  }
+    outfile=f'{stamp}.allprojects.{mount}.json'
+    print(mount, outfile)
+    config = {
+      'cmd': 'nci-files-report',
+      'write_header': False,
+      'name': f'allprojects_{mount}',
+      'outfile': os.path.join(outputdir,outfile),
+      'options': f"{project_option} {' '.join(projects)} --filesystem {mount} --json"
+    }
+    yield run_stats_cmd_gen(config)
 
 
 def task__listing():
@@ -198,25 +207,25 @@ def task_upload_usage():
 
 def task_upload_storage():
   """
-  Loop over all mounts the global config, find all dumpfiles and create 
-  a separate sub-task for each by yielding a run dictionary. doit will 
-  generate all the tasks first, and then run them all.
+  Loop over all mounts the global config, use the backend API for
+  nci-files-report, gather and upload storage data for all projects
+  on each requested filesystem.
   """
   for mount in global_config['mounts']:
-    for dumpfile in glob.glob(os.path.join(outputdir,'*.{mount}.dump'.format(mount=mount))):
-      stamp, project = os.path.basename(dumpfile).split('.')[:2]
-      outfile = '{project}.storage.upload.log'.format(project=project)
+      jsonfiles = glob.glob(os.path.join(outputdir,f'*.allprojects.{mount}.json'))
+      stamp = os.path.basename
       dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
-      config = {
-        'cmd': 'parse_user_storage_data',
-        'name': '{project}_{mount}_upload_{datestamp}'.format(project=project, mount=mount, datestamp=stamp),
-        'outfile': os.path.join(outputdir,outfile),
-        'options': '-db {dburl} {file}'.format(dburl=dburl, file=dumpfile),
-        # 'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
-        # 'task_dep': [ 'start_tunnel' ],
-        # 'file_dep': [ dumpfile ],
-      }
-      yield run_stats_cmd_gen(config)
+      for jsonfile in jsonfiles:
+        config = {
+          'cmd': 'parse_user_storage_data',
+          'name': f'{mount}_upload_{stamp}',
+          'outfile': os.path.join(outputdir,'allprojects.storage.upload.log'),
+          'options': f'-db {dburl} {jsonfile}'
+          # 'task_dep': [ 'dump_storage:{project}_{mount}'.format(project=project, mount=mount), 'start_tunnel'],
+          # 'task_dep': [ 'start_tunnel' ],
+          # 'file_dep': [ dumpfile ],
+        }
+        yield run_stats_cmd_gen(config)
 
 def task_upload_lquota():
   """
