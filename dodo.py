@@ -212,9 +212,9 @@ def task_upload_storage():
   """
   for mount in global_config['mounts']:
       jsonfiles = glob.glob(os.path.join(outputdir,f'*.allprojects.{mount}.json'))
-      stamp = os.path.basename(jsonfiles[0]).split('.')[0]
       dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
       for jsonfile in jsonfiles:
+        stamp = os.path.basename(jsonfile).split('.')[0]
         config = {
           'cmd': 'parse_user_storage_data',
           'name': f'{mount}_upload_{stamp}',
