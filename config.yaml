@@ -1,6 +1,6 @@
 defaults:
-  outputdir: /g/data3/hh5/admin/analytics/logs
-  # outputdir: dump
+  #outputdir: /g/data3/hh5/admin/analytics/logs
+  outputdir: dump
   dateformat: '%FT%T'
   remote_host: jenkins
   remote_port: 5432
