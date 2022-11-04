@@ -4,6 +4,7 @@ eval "$(conda shell.bash hook)"
 
 # Ensure correct modules loaded
 module purge
+module load git/2.37.3
 module use /g/data3/hh5/public/modules
 module load conda
 conda activate stats
