@@ -120,7 +120,6 @@ def task_dump_storage():
     #    'options': '{option} {project} --filesystem {mount}'.format(option=project_option, project=project, mount=mount),
     #  }
     outfile=f'{stamp}.allprojects.{mount}.json'
-    print(mount, outfile)
     config = {
       'cmd': 'nci-files-report',
       'write_header': False,
@@ -213,7 +212,7 @@ def task_upload_storage():
   """
   for mount in global_config['mounts']:
       jsonfiles = glob.glob(os.path.join(outputdir,f'*.allprojects.{mount}.json'))
-      stamp = os.path.basename
+      stamp = os.path.basename()
       dburl = global_config['defaults'].get('dburl','postgresql://localhost:{local_port}/grafana').format(**global_config['defaults'])
       for jsonfile in jsonfiles:
         config = {
