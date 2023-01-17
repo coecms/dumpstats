@@ -28,7 +28,6 @@ mounts:
     - nm03
     - k10
     - p73
-    - dp9
     - jk72
     - tm70
   gdata:
@@ -50,7 +49,6 @@ mounts:
     - cj50 
     - y99
     - p73
-    - dp9
     - jk72
     - tm70
 compute:
@@ -70,6 +68,5 @@ compute:
   - y99 
   - nm03
   - k10
-  - dp9
   - jk72
   - tm70
