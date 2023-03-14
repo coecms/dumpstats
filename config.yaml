@@ -30,6 +30,7 @@ mounts:
     - p73
     - jk72
     - tm70
+    - xd2
   gdata:
     - v45
     - w40
@@ -51,6 +52,7 @@ mounts:
     - p73
     - jk72
     - tm70
+    - xd2
 compute:
   - v45
   - w40
@@ -70,3 +72,4 @@ compute:
   - k10
   - jk72
   - tm70
+  - xd2
