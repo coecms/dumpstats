@@ -30,6 +30,13 @@ mounts:
     - p73
     - jk72
     - tm70
+    - iq82
+    - ol01
+    - rp23
+    - gx60
+    - lg87
+    - au88
+    - nm47
     - xd2
   gdata:
     - v45
@@ -52,6 +59,15 @@ mounts:
     - p73
     - jk72
     - tm70
+    - iq82
+    - ol01
+    - rp23
+    - gx60
+    - lg87
+    - au88
+    - nm47
+    - kj13
+    - xp65
     - xd2
 compute:
   - v45
@@ -72,4 +88,11 @@ compute:
   - k10
   - jk72
   - tm70
+  - iq82
+  - ol01
+  - rp23
+  - gx60
+  - lg87
+  - au88
+  - nm47
   - xd2
