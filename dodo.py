@@ -88,7 +88,7 @@ def task_dump_lquota():
   """
   outfile = '{stamp}.lquota.dump'.format(stamp=stamp)
   config = {
-    'cmd': 'lquota',
+    'cmd': 'lquota --no-pretty-print',
     'write_header': True,
     'name': 'lquota',
     'outfile': os.path.join(outputdir,outfile),
