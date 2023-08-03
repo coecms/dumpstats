@@ -4,8 +4,8 @@ set -x
 # conda create -p /g/data/hh5/admin/analytics/conda/env/stats ncigrafana doit pyyaml pymunge requests -c conda-forge -c coecms
 
 # Ensure correct modules loaded
-#module purge
-#module load git/2.37.3
+module purge
+module load git/2.37.3
 #module use /g/data/hh5/public/modules
 #module load conda
 
